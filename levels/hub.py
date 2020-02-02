@@ -270,4 +270,5 @@ bulb = True
 def init():
     # uf.walk_in()
     uf.play_sound('door_close_heavy')
-    gb.playerpos_x, gb.playerpos_y = playerpos[0] * tile_width, playerpos[1] * tile_height
+    if not gb.from_save:
+        gb.playerpos_x, gb.playerpos_y = (0, 0)

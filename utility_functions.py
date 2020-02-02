@@ -499,4 +499,60 @@ def load():
         return None
 
 
+def broken_bulb():
+    frames = [
+        pygame.transform.scale(load_image(r'player/broken/a ' + str(i) + '.png', (0, 0, 0)), gb.size) for i in
+        range(0, 8)]
+    counter_for_movements = 0
+    fade_out()
+    for i in range(199):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gb.running = False
 
+        alpha_surf = pygame.Surface(gb.size)
+        # alpha_surf.fill((0, 0, 0, 0))
+        if counter_for_movements < 5:
+            frame = 0
+        if 5 <= counter_for_movements < 13:
+            frame = counter_for_movements - 5
+        if 13 <= counter_for_movements < 15:
+            frame = -1
+        try:
+            alpha_surf.blit(frames[frame], (0, 0))
+        except:
+            alpha_surf.blit(frames[-1], (0, 0))
+        gb.screen.blit(alpha_surf, (0, 0))
+
+        if i % 10 == 0 and counter_for_movements < 15:
+            counter_for_movements += 1
+        pygame.display.flip()
+        gb.clock.tick(30)
+    fade_out()
+    gb.from_save = False
+    exit(0)
+
+
+def load_animation():
+    frames = [
+        pygame.transform.scale(load_image(r'first/' + str(i) + '.png', (0, 0, 0)), gb.size) for i in
+        range(1, 12)]
+    counter_for_movements = 0
+    for i in range(199):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gb.running = False
+
+        alpha_surf = pygame.Surface(gb.size)
+        # alpha_surf.fill((0, 0, 0, 0))
+        try:
+            alpha_surf.blit(frames[counter_for_movements], (0, 0))
+        except:
+            alpha_surf.blit(frames[-1], (0, 0))
+        gb.screen.blit(alpha_surf, (0, 0))
+
+        if i % 10 == 0 and counter_for_movements < 13:
+            counter_for_movements += 1
+        pygame.display.flip()
+        gb.clock.tick(30)
+    fade_out()

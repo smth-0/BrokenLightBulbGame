@@ -21,6 +21,7 @@ resp = uf.load()
 if resp:
     lvl_name, pos = resp
 else:
+    uf.load_animation()
     lvl_name, pos = 'start', (0, 0)
 gb.playerpos_x, gb.playerpos_y = pos
 gb.cur_lvl = uf.load_level(lvl_name)

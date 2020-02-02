@@ -50,13 +50,14 @@ class Player(pygame.sprite.Sprite):
             pygame.transform.scale(
                 uf.load_image('player\\' + self.bulb + '\walking_down\walk_' + str(i) + '.png', -1), gb.player_size) for
             i in range(1, 7)]
-
+        self.down = uf.load_image('player/down.png', -1)
         self.image = self.walking_down[0]
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x * gb.tile_height + gb.playerpos_x, y * gb.tile_height + gb.playerpos_y
         self.collisionObj = CollisionOfThePlayer(x, y)
         self.pick_up_collision = Pick_up_collision(x, y, self.collisionObj)
         self.light_map = Niko_lightmap(x, y)
+        self.is_down = False
         self.counter_for_movements = 0
 
     def update(self, *args):
@@ -109,6 +110,8 @@ class Player(pygame.sprite.Sprite):
                     self.image = self.walking_down[0]
                 if gb.prev_move == 'up':
                     self.image = self.walking_up[0]
+        if self.is_down:
+            self.image = self.down
 
 
 class CollisionOfThePlayer(pygame.sprite.Sprite):
@@ -144,7 +147,7 @@ class CollisionOfThePlayer(pygame.sprite.Sprite):
             if pygame.sprite.collide_mask(i, self):
                 collide = True
             self.image = self.image_transparent
-        if collide and not gb.debug:
+        if collide:
             if gb.velocity_x_actual > 0:
                 self.rect.x += -speed
                 gb.playerpos_x += -speed
@@ -437,5 +440,63 @@ class SaveBed(AbstractMachinery):
                     if uf.ask_nap():
                         uf.fade_out()
                         uf.save()
+                        exit(0)
                     else:
-                        pass
+                        gb.msg_query.append((MSG('ok, maybe later.'), uf.face('niko', 'distressed')))
+                        gb.mode = 1
+
+
+class DynamicClickableDoor(AbstractMachinery):
+    def __init__(self, pos_x, pos_y, image):
+        super().__init__(pos_x, pos_y, image)
+        self.passable = False
+        self.closed = uf.load_image('tiles/barrens/ddoor1.png', (255, 0, 0))
+        self.opened = uf.load_image('tiles/barrens/ddoor2.png', (255, 0, 0))
+        self.called = False
+
+    def update(self, *args):
+        if args:
+            if args[0] == 'click':
+                x, y = gb.mousepos
+                if self.rect.x <= x <= self.rect.x + self.rect.w and self.rect.y <= y <= self.rect.y + self.rect.h:
+                    self.passable = not self.passable
+                    if self.passable:
+                        if self in gb.not_passable_group:
+                            self.remove(gb.not_passable_group)
+                            self.image = self.opened
+                    else:
+                        if self not in gb.not_passable_group:
+                            self.add(gb.not_passable_group)
+                            self.image = self.closed
+                            if pygame.sprite.collide_rect(gb.player.collisionObj, self):
+                                if gb.player.bulb == 'with_bulb':
+                                    self.called = True
+                                    gb.msg_query.append((MSG('WHY DID YOU DO THIS?!\n my coat is now so wet! Oh wait...'),
+                                                         uf.face('niko', 'what')))
+                                    gb.msg_query.append((MSG('WHERE\'S THE BULB?'), uf.face('niko', 'what')))
+                                    gb.player.down = True
+                                    gb.mode = 1
+
+                    uf.play_sound('door_locked')
+            if args[0] == 'pick_up':
+                if not self.passable:
+                    var = ['ehh... I don\'t want to get wet.',
+                           'There\'s slight mark on side.\nIt says "pure energy PSU required."\nI wonder what it means.',
+                           'It\'s a trap door. ',
+                           ]
+                else:
+                    var = ['ehh... I don\'t want to get wet.\nPlease do not open it while I\'m on it.',
+                           '"pure energy PSU required." mark on side probably means power of gods.',
+                           'It\'s a trap door. You closed it. Obviously',
+                           ]
+                if pygame.sprite.collide_rect(self, gb.player.pick_up_collision):
+                    gb.msg_query.append((MSG(random.choice(var)), uf.face('niko')))
+                    gb.mode = 1
+            if args[0] == 'animation':
+                if self.called and pygame.sprite.collide_rect(gb.player.collisionObj, self):
+                    uf.broken_bulb()
+                    gb.player.collisionObj.rect.y += 64
+                if self not in gb.not_passable_group and not pygame.sprite.collide_rect(gb.player.collisionObj, self):
+                    self.add(gb.not_passable_group)
+                    self.passable = False
+                    self.image = self.closed

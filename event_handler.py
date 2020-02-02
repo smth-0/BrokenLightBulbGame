@@ -33,7 +33,7 @@ def check():
                 x, y = event.pos
                 # if the left button is pressed
                 if event.button == 1:
-                    pass
+                    gb.all_sprites.update('click')
                 # if the right button is pressed
                 elif event.button == 3:
                     pass
