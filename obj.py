@@ -29,8 +29,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, bulb):
         super().__init__(gb.all_sprites)
         sx, sy = 39, 50
-
-        self.bulb = 'with_bulb' if bulb else 'without_bulb'
+        print('init player', x, y, gb.playerpos_x, gb.playerpos_y)
+        self.bulb = 'with_bulb' if bulb or gb.invertory else 'without_bulb'
         self.indexed = False
         self.moving_left = [
             pygame.transform.scale(
@@ -53,7 +53,7 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.walking_down[0]
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x * gb.tile_height, y * gb.tile_height
+        self.rect.x, self.rect.y = x * gb.tile_height + gb.playerpos_x, y * gb.tile_height + gb.playerpos_y
         self.collisionObj = CollisionOfThePlayer(x, y)
         self.pick_up_collision = Pick_up_collision(x, y, self.collisionObj)
         self.light_map = Niko_lightmap(x, y)
@@ -117,7 +117,7 @@ class CollisionOfThePlayer(pygame.sprite.Sprite):
         self.image_transparent = self.image = uf.load_image('collision.png', (0, 0, 0))
         self.image_not_transparent = uf.load_image('collision.png', (100, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x * gb.tile_height, y * gb.tile_height
+        self.rect.x, self.rect.y = x * gb.tile_height + gb.playerpos_x, y * gb.tile_height + gb.playerpos_y
         self.prevMove = True
 
     def update(self, *args):
@@ -169,7 +169,7 @@ class Pick_up_collision(pygame.sprite.Sprite):
         self.vertical = uf.load_image('pick_up_collision_vertical.png', (0, 0, 0))
         self.image = self.horizontal
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x * gb.tile_height + 20, y * gb.tile_height
+        self.rect.x, self.rect.y = x * gb.tile_height + 20 + gb.playerpos_x, y * gb.tile_height + gb.playerpos_y
         self.direction = 'right'
 
     def update(self, *args):
@@ -434,4 +434,8 @@ class SaveBed(AbstractMachinery):
         if args:
             if args[0] == 'pick_up':
                 if pygame.sprite.collide_rect(self, gb.player.pick_up_collision):
-                    uf.ask_nap()
+                    if uf.ask_nap():
+                        uf.fade_out()
+                        uf.save()
+                    else:
+                        pass

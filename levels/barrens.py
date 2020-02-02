@@ -1,5 +1,4 @@
 import random
-# todo
 import obj
 import utility_functions as uf
 import global_variables as gb
@@ -9,6 +8,7 @@ playerpos = 24, 5
 bulb = True
 tile_size = tile_width, tile_height = 64, 64
 
+name = 'barrens'
 wall_down = ['tiles/barrens/down_%d.png' % i for i in range(1, 6)]
 wall2 = ['tiles/barrens/wallG%d.png' % i for i in range(2, 6)]
 floor = ['tiles/barrens/floor_%d.png' % i for i in range(1, 11)]
@@ -262,4 +262,5 @@ music_theme = 'Nightmargin (Casey Gu), ft Eliza Velasquez and Michael Shirt - On
 
 
 def init():
-    pass
+    if not gb.from_save:
+        gb.playerpos_x, gb.playerpos_y = (0, 0)

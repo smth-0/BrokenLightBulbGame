@@ -5,6 +5,8 @@ import utility_functions as uf
 import global_variables as gb
 import pygame
 
+name = 'hub'
+
 
 class Portal(obj.AbstractMachinery):
 

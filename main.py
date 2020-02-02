@@ -17,13 +17,20 @@ gb.debug = False  ##############################################################
 first = True
 song_list = []
 
-gb.cur_lvl = uf.load_level('barrens')
+resp = uf.load()
+if resp:
+    lvl_name, pos = resp
+else:
+    lvl_name, pos = 'start', (0, 0)
+gb.playerpos_x, gb.playerpos_y = pos
+gb.cur_lvl = uf.load_level(lvl_name)
 gb.player, level_x, level_y = uf.generate_level(gb.cur_lvl)
 
 mousePoint, cam = obj.Mouse(), obj.Camera()
 
 gb.every_half_a_second = pygame.USEREVENT + 1
 pygame.time.set_timer(gb.every_half_a_second, 500)
+
 
 while gb.running:
     isinfocus = bool(pygame.mouse.get_focused())

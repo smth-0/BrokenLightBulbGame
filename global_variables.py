@@ -51,7 +51,7 @@ mouse = pygame.sprite.Group()
 tile_width = tile_height = 50
 cur_lvl = None
 count = 0
-
+from_save = False
 up = pygame.K_w
 down = pygame.K_s
 left = pygame.K_a

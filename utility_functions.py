@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import sys
@@ -122,8 +123,8 @@ def generate_level(lvl):
                 if len(lvl.items_on_ground_links[map[iy][ix]][1]) > 1:
                     cur_cntstr(ix, iy, load_image(img_link, color_key),
                                *lvl.items_on_ground_links[map[iy][ix]][1][1:])
-    new_player = obj.Player(fx, fy, lvl.bulb)
     gb.cur_lvl.init()
+    new_player = obj.Player(fx, fy, lvl.bulb)
     gb.current_music_theme = lvl.music_theme
     pygame.mixer.music.stop()
     return new_player, x, y
@@ -317,10 +318,11 @@ def debug_hud():
     vY:%d   Y_tile:%f
     vX_act:%d
     vY_act:%d   sprites:%s
+    start X:%d, Y:%d
     """ % (
         gb.velocity_x, gb.playerpos_x / gb.tile_width, gb.velocity_y, gb.playerpos_y / gb.tile_height,
         gb.velocity_x_actual,
-        gb.velocity_y_actual, str(gb.all_sprites))
+        gb.velocity_y_actual, str(gb.all_sprites), gb.playerpos_x, gb.playerpos_y)
     font = pygame.font.Font(None, 30)
     msgs = data.split('\n')
     for line in range(len(msgs)):
@@ -418,17 +420,28 @@ def ask_nap():
                'Yeah it\'s alright.',
                'Sure, have a good night!'
                ]
-    var_no = ['',
-              '',
-              '']
-    msg, fface = random.choice(var_ques), face('niko', 'yawn')
+    var_no = ['I think, we have what to do know.',
+              'Not now, maybe a little bit later?',
+              'uhhh...no.']
+    msg, face1, face2 = random.choice(var_ques), face('niko', 'yawn'), face('niko')
 
     yes = random.choice(var_yes)
     no = random.choice(var_no)
 
     is_yes = False
 
+    font = pygame.font.Font(None, 30)
+    font2 = pygame.font.Font(None, 25)
+    selection = load_image('selection.png')
+    counter = 0
+
     while True:
+
+        if counter < 50:
+            counter += 1
+            fface = face1
+        else:
+            fface = face2
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -443,11 +456,19 @@ def ask_nap():
         frame.blit(orig_frame, (0, 0))
         sc = load_image('msg.png', -1).convert_alpha()
 
-        font = pygame.font.Font(None, 30)
         msgs = msg.split('\n')
         for line in range(len(msgs)):
             text = font.render(str(msgs[line]), 1, (255, 255, 255))
             sc.blit(text, (30, 25 + 35 * line))
+        yellow = (255, 241, 35)
+        white = (255, 255, 255)
+
+        sc.blit(selection, (25, 80 if is_yes else 105))
+
+        yes_txt = font2.render(yes, 1, yellow if is_yes else white)
+        no_txt = font2.render(no, 1, yellow if not is_yes else white)
+        sc.blit(yes_txt, (30, 85))
+        sc.blit(no_txt, (30, 110))
 
         sc.blit(fface, (710, 5))
 
@@ -455,3 +476,27 @@ def ask_nap():
 
         gb.screen.blit(frame, (0, 0))
         pygame.display.flip()
+        gb.clock.tick(60)
+
+
+def save():
+    file_entry = open('res/data.txt', 'w')
+    data = [gb.cur_lvl.name, (gb.playerpos_x, gb.playerpos_y)]
+    json_file = json.dumps(data)
+    file_entry.write(json_file)
+
+
+def load():
+    file_entry = open('res/data.txt', 'r')
+    try:
+        data = json.loads(file_entry.read())
+        cur_lvl_name, player_pos = data
+        gb.from_save = True
+        return cur_lvl_name, player_pos
+    except Exception as e:
+        gb.from_save = False
+        print('failed to load save, stack:', e)
+        return None
+
+
+

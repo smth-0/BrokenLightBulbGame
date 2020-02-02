@@ -5,6 +5,8 @@ import utility_functions as uf
 import global_variables as gb
 import pygame
 
+name = 'old_house'
+
 
 class DoorClosed(obj.AbstractDialogueTile):
     def __init__(self, pos_x, pos_y, image):
@@ -33,7 +35,7 @@ class DynamicDoor(obj.DoorTile):
                 gb.player.collisionObj.rect.y += self.goto_pos[1] * gb.tile_height
                 uf.door_move()
             else:
-                uf.lvl_change('hub')
+                uf.lvl_change('barrens')
 
 
 class Lightbulb(obj.ItemOnGround):
@@ -531,9 +533,13 @@ items_map = [
 ]
 
 bulb = False
+
+
 def init():
     # uf.walk_in()
+    print(gb.playerpos_x, gb.playerpos_y)
+    gb.playerpos_x, gb.playerpos_y = (0, 0)
     uf.play_sound('door_close_heavy')
-    gb.playerpos_x, gb.playerpos_y = playerpos[0] * tile_width, playerpos[1] * tile_height
+    # gb.playerpos_x, gb.playerpos_y = playerpos[0] * tile_width, playerpos[1] * tile_height
     gb.PC_access_granted = False
     gb.darken = True

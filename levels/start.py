@@ -5,6 +5,8 @@ import utility_functions as uf
 import global_variables as gb
 import pygame
 
+name = 'start'
+
 
 class Lightbulb(obj.ItemOnGround):
     def update(self, *args):
